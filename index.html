@@ -3,9 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Greeting</title>
+  <title>Texting Website</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+    #messages {
+      border: 1px solid #ccc;
+      height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    #messageInput {
+      width: 75%;
+      padding: 10px;
+    }
+    #sendButton {
+      padding: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Hi</h1>
+  <h1>Free Texting Website</h1>
+  <div id="messages"></div>
+  <input type="text" id="messageInput" placeholder="Type your message" />
+  <button id="sendButton">Send</button>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js"></script>
+
+  <script>
+    // Step 1: Configure Firebase
+    const firebaseConfig = {
+      apiKey: "YOUR_FIREBASE_API_KEY",
+      authDomain: "YOUR_FIREBASE_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_FIREBASE_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_FIREBASE_PROJECT_ID",
+      storageBucket: "YOUR_FIREBASE_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Step 2: Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Step 3: Texting Logic
+    const messagesDiv = document.getElementById("messages");
+    const messageInput = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+
+    // Listen for new messages in the database
+    db.ref("messages").on("child_added", (snapshot) => {
+      const messageData = snapshot.val();
+      const messageElement = document.createElement("div");
+      messageElement.textContent = messageData.text;
+      messagesDiv.appendChild(messageElement);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to the bottom
+    });
+
+    // Send a new message
+    sendButton.addEventListener("click", () => {
+      const messageText = messageInput.value.trim();
+      if (messageText) {
+        db.ref("messages").push({ text: messageText }); // Save to database
+        messageInput.value = ""; // Clear input field
+      }
+    });
+  </script>
 </body>
 </html>
